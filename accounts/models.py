@@ -5,16 +5,26 @@ from django.db import models
 class User(AbstractUser):
     email = models.EmailField(unique=True)
     AGE_GROUP_CHOICES = [
-        ("13-17", "Teen"),
-        ("18-24", "Young Adult"),
-        ("25+", "Adult"),
+        ("teen", "Teen"),
+        ("young_adult", "Young Adult"),
+        ("adult", "Adult"),
     ]
+    age = models.IntegerField(blank=True, null=True)
     age_group = models.CharField(
-        max_length=10, 
+        max_length=20, 
         choices=AGE_GROUP_CHOICES,
         blank=True,
         null=True
     )
+    def save(self, *args, **kwargs):
+        if self.age is not None:
+            if self.age < 18:
+                self.age_group = "teen"
+            elif 18 <= self.age < 30:
+                self.age_group = "young_adult"
+            else:
+                self.age_group = "adult"
+        super().save(*args, **kwargs)
     GENDER_CHOICES = [
         ("male", "Male"),
         ("female", "Female"),
